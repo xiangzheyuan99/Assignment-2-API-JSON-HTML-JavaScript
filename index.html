@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>US Population | Data Dashboard</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --accent: #10b981;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --glass: blur(12px);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 800px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #818cf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0 0 10px 0;
+    }
+
+    .subtitle { color: var(--text-muted); font-size: 1.1rem; }
+
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: var(--glass);
+      -webkit-backdrop-filter: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .controls {
+      display: flex;
+      padding: 24px;
+      gap: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    input[type="search"] {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: white;
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    input[type="search"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      padding: 16px 24px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .pop-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent);
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent);
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    .status-msg {
+      padding: 60px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .error-text { color: #f87171; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <header>
+    <h1>US Population</h1>
+    <p class="subtitle">National census data retrieved from Data USA API</p>
+  </header>
+
+  <div class="glass-card">
+    <div class="controls">
+      <input id="search" type="search" placeholder="Filter by year..." />
+      <button id="sortBtn">
+        <span id="sortIcon">↓</span> Sort Year
+      </button>
+      <button id="reloadBtn" class="secondary">Reload</button>
+    </div>
+
+    <div id="status" class="status-msg">Initializing...</div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Year</th>
+            <th style="text-align: right;">Total Population</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = "https://datausa.io/api/data?drilldowns=Nation&measures=Population";
+  let dataStore = [];
+  let isDesc = true;
+
+  const tbody = document.getElementById("tbody");
+  const searchInput = document.getElementById("search");
+  const sortBtn = document.getElementById("sortBtn");
+  const sortIcon = document.getElementById("sortIcon");
+  const statusEl = document.getElementById("status");
+
+  async function fetchData() {
+    statusEl.style.display = "block";
+    statusEl.innerHTML = "Fetching data...";
+    tbody.innerHTML = "";
+    
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const result = await response.json();
+      
+      if (result && result.data) {
+        dataStore = result.data.map(item => ({
+          year: parseInt(item.Year),
+          population: item.Population
+        }));
+        statusEl.style.display = "none";
+        render();
+      } else {
+        throw new Error('Invalid data format');
+      }
+    } catch (error) {
+      statusEl.innerHTML = `<span class="error-text">Failed to connect to API.</span><br><small>${error.message}</small>`;
+      console.error("Fetch error:", error);
+    }
+  }
+
+  function render() {
+    const query = searchInput.value.trim().toLowerCase();
+    let filtered = dataStore.filter(d => String(d.year).includes(query));
+    
+    filtered.sort((a, b) => isDesc ? b.year - a.year : a.year - b.year);
+
+    if (filtered.length === 0 && dataStore.length > 0) {
+      statusEl.style.display = "block";
+      statusEl.textContent = "No results found.";
+    } else {
+      statusEl.style.display = "none";
+    }
+
+    tbody.innerHTML = filtered.map(d => `
+      <tr>
+        <td><span class="badge">${d.year}</span></td>
+        <td class="pop-cell">${Number(d.population).toLocaleString()}</td>
+      </tr>
+    `).join('');
+  }
+
+  sortBtn.onclick = () => {
+    isDesc = !isDesc;
+    sortIcon.textContent = isDesc ? "↓" : "↑";
+    render();
+  };
+
+  searchInput.oninput = render;
+  document.getElementById("reloadBtn").onclick = fetchData;
+
+  fetchData();
+</script>
+
+</body>
+</html>
