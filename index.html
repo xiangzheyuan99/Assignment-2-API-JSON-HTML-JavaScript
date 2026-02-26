@@ -3,118 +3,370 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>US Population | Live Dashboard</title>
+  <title>US Population Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #6366f1;
-      --accent: #10b981;
-      --bg: #0f172a;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg: #000000;
+      --surface: #111111;
+      --accent: #ffffff;
+      --text-main: #ffffff;
+      --text-dim: #888888;
       --border: rgba(255, 255, 255, 0.1);
-      --glass: blur(12px);
+      --glass: rgba(255, 255, 255, 0.03);
     }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
     body {
       margin: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background-color: var(--bg);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 80px 24px;
     }
-    .dashboard { width: 100%; max-width: 800px; animation: fadeIn 0.8s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    header { text-align: center; margin-bottom: 40px; }
-    h1 { font-size: 3rem; font-weight: 800; background: linear-gradient(to right, #818cf8, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
-    .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 10px; }
-    .glass-card { background: var(--card-bg); backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); overflow: hidden; }
-    .controls { display: flex; padding: 24px; gap: 15px; background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-    input[type="search"] { flex: 1; min-width: 200px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; color: white; outline: none; transition: 0.3s; }
-    input[type="search"]:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
-    button { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
-    button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-    button.secondary { background: rgba(255, 255, 255, 0.1); }
-    .table-container { max-height: 500px; overflow-y: auto; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { padding: 16px 24px; font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); background: rgba(0, 0, 0, 0.1); position: sticky; top: 0; }
-    td { padding: 18px 24px; border-bottom: 1px solid var(--border); font-size: 1rem; }
-    .pop-cell { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent); text-align: right; }
-    .badge { display: inline-block; padding: 4px 12px; background: rgba(16, 185, 129, 0.1); color: var(--accent); border-radius: 20px; font-size: 0.8rem; }
-    .status-msg { padding: 60px; text-align: center; color: var(--text-muted); }
+
+    .wrapper {
+      width: 100%;
+      max-width: 1000px;
+      animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    header {
+      margin-bottom: 64px;
+      text-align: center;
+    }
+
+    .brand-tag {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin: 0 0 16px 0;
+    }
+
+    .desc {
+      font-size: 18px;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .main-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+
+    .controls {
+      display: flex;
+      padding: 32px;
+      gap: 20px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: var(--glass);
+    }
+
+    .search-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid transparent;
+      border-radius: 14px;
+      padding: 14px 20px;
+      color: var(--text-main);
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.2);
+    }
+
+    button {
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.2s active, opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    #reloadBtn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    #reloadBtn:hover {
+      background: var(--glass);
+    }
+
+    .table-box {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 24px 32px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 24px 32px;
+      font-size: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    
+    tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .num-cell {
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .bar-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    .visual-bar {
+      height: 6px;
+      background: var(--accent);
+      border-radius: 3px;
+      opacity: 0.3;
+    }
+
+    .meta-footer {
+      padding: 24px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--glass);
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+    }
+
+    .badge-live { color: #00ff88; border-color: rgba(0,255,136,0.2); }
+    .badge-cache { color: #ffbb00; border-color: rgba(255,187,0,0.2); }
+
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
   </style>
 </head>
-<body>
 
-<div class="dashboard">
-  <header>
-    <h1>US Population</h1>
-    <p class="subtitle">Bypassing CORS via proxy for local preview</p>
-  </header>
-  <div class="glass-card">
-    <div class="controls">
-      <input id="search" type="search" placeholder="Filter years..." />
-      <button id="sortBtn"><span id="sortIcon">↓</span> Year</button>
-      <button id="reloadBtn" class="secondary">Reload</button>
-    </div>
-    <div id="status" class="status-msg">Fetching data via secure proxy...</div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Year</th>
-            <th style="text-align: right;">Total Population</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
+<body>
+  <div class="wrapper">
+    <header>
+      <span class="brand-tag">Data Visualization</span>
+      <h1>United States Population</h1>
+      <p class="desc">Global demographic insights retrieved in real-time from the DataUSA public repository.</p>
+    </header>
+
+    <div class="main-card">
+      <div class="controls">
+        <input id="search" class="search-input" type="search" placeholder="Filter by year..." />
+        <button id="sortBtn">Year ↓</button>
+        <button id="reloadBtn">Refresh</button>
+      </div>
+
+      <div class="table-box">
+        <table>
+          <thead>
+            <tr>
+              <th>Fiscal Year</th>
+              <th style="text-align: right;">Total Population</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="meta-footer">
+        <div>
+          <span id="sourceBadge" class="badge">Checking...</span>
+          <span id="lastUpdated" style="margin-left: 12px;">Syncing...</span>
+        </div>
+        <div id="countLabel">0 Records</div>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  // 使用 corsproxy.io 强制解决本地打开文件的跨域问题
-  const API_URL = "https://corsproxy.io/?https://datausa.io/api/data?drilldowns=Nation&measures=Population";
-  let dataStore = [];
-  let isDesc = true;
+  <script>
+    const API_URL = "https://datausa.io/api/data?drilldowns=Nation&measures=Population";
+    const PROXIES = [
+      (u) => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u),
+      (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u),
+      (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)
+    ];
+    
+    const FALLBACK = {
+      data: [
+        { Year: "2022", Population: 331893745 }, { Year: "2021", Population: 329725481 },
+        { Year: "2020", Population: 326569308 }, { Year: "2019", Population: 324697795 },
+        { Year: "2018", Population: 322903030 }, { Year: "2017", Population: 321004407 }
+      ]
+    };
 
-  const tbody = document.getElementById("tbody");
-  const searchInput = document.getElementById("search");
-  const sortBtn = document.getElementById("sortBtn");
-  const statusEl = document.getElementById("status");
+    const tbody = document.getElementById("tbody");
+    const sortBtn = document.getElementById("sortBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const searchInput = document.getElementById("search");
+    const countLabel = document.getElementById("countLabel");
+    const lastUpdated = document.getElementById("lastUpdated");
+    const sourceBadge = document.getElementById("sourceBadge");
 
-  async function fetchData() {
-    statusEl.style.display = "block";
-    statusEl.textContent = "Connecting to Data USA API...";
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Proxy error");
-      const result = await response.json();
-      dataStore = result.data.map(item => ({ year: parseInt(item.Year), population: item.Population }));
-      statusEl.style.display = "none";
-      render();
-    } catch (e) {
-      statusEl.innerHTML = "<span style='color:#ff6b6b'>Connection Failed.</span><br><small>The proxy might be down or you are offline.</small>";
+    let dataset = [];
+    let isDescending = true;
+
+    function formatNum(n) {
+      return new Intl.NumberFormat("en-US").format(n);
     }
-  }
 
-  function render() {
-    let filtered = dataStore.filter(d => String(d.year).includes(searchInput.value));
-    filtered.sort((a, b) => isDesc ? b.year - a.year : a.year - b.year);
-    tbody.innerHTML = filtered.map(d => `
-      <tr>
-        <td><span class="badge">${d.year}</span></td>
-        <td class="pop-cell">${d.population.toLocaleString()}</td>
-      </tr>
-    `).join('');
-  }
+    function renderTable(data) {
+      tbody.innerHTML = "";
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:64px; color:#555;">No results found</td></tr>`;
+        return;
+      }
 
-  sortBtn.onclick = () => { isDesc = !isDesc; document.getElementById("sortIcon").textContent = isDesc ? "↓" : "↑"; render(); };
-  searchInput.oninput = render;
-  document.getElementById("reloadBtn").onclick = fetchData;
-  fetchData();
-</script>
+      const maxVal = Math.max(...data.map(i => i.Population));
+
+      data.forEach(item => {
+        const tr = document.createElement("tr");
+        const ratio = (item.Population / maxVal) * 100;
+
+        tr.innerHTML = `
+          <td style="font-weight:600; letter-spacing:-0.02em;">${item.Year}</td>
+          <td class="num-cell">
+            <div class="bar-container">
+              <span>${formatNum(item.Population)}</span>
+              <div class="visual-bar" style="width: ${ratio * 0.8}%"></div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      countLabel.textContent = `${data.length} Records`;
+    }
+
+    function getProcessedData() {
+      const term = searchInput.value.toLowerCase();
+      let filtered = dataset.filter(d => String(d.Year).includes(term));
+      filtered.sort((a, b) => isDescending ? (b.Year - a.Year) : (a.Year - b.Year));
+      return filtered;
+    }
+
+    async function fetchData() {
+      sourceBadge.textContent = "Loading";
+      sourceBadge.className = "badge";
+
+      for (let i = 0; i < PROXIES.length; i++) {
+        try {
+          const res = await fetch(PROXIES[i](API_URL));
+          if (!res.ok) continue;
+          const text = await res.text();
+          if (!text.trim().startsWith("{")) continue;
+          
+          const parsed = JSON.parse(text);
+          dataset = parsed.data.map(d => ({ Year: Number(d.Year), Population: Number(d.Population) }));
+          sourceBadge.textContent = "Live Stream";
+          sourceBadge.className = "badge badge-live";
+          finalizeLoad();
+          return;
+        } catch (e) {}
+      }
+
+      dataset = FALLBACK.data;
+      sourceBadge.textContent = "Cached";
+      sourceBadge.className = "badge badge-cache";
+      finalizeLoad();
+    }
+
+    function finalizeLoad() {
+      renderTable(getProcessedData());
+      lastUpdated.textContent = `Updated at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    }
+
+    sortBtn.addEventListener("click", () => {
+      isDescending = !isDescending;
+      sortBtn.textContent = `Year ${isDescending ? "↓" : "↑"}`;
+      renderTable(getProcessedData());
+    });
+
+    reloadBtn.addEventListener("click", fetchData);
+    searchInput.addEventListener("input", () => renderTable(getProcessedData()));
+    window.addEventListener("DOMContentLoaded", fetchData);
+  </script>
 </body>
 </html>
