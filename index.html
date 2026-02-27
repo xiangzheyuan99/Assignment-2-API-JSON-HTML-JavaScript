@@ -3,370 +3,112 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>US Population Analytics</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>US Population</title>
   <style>
-    :root {
-      --bg: #000000;
-      --surface: #111111;
-      --accent: #ffffff;
-      --text-main: #ffffff;
-      --text-dim: #888888;
-      --border: rgba(255, 255, 255, 0.1);
-      --glass: rgba(255, 255, 255, 0.03);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-font-smoothing: antialiased;
-    }
-
     body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #f2f2f2;
       margin: 0;
-      font-family: 'Inter', -apple-system, system-ui, sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      padding: 80px 24px;
-    }
-
-    .wrapper {
-      width: 100%;
-      max-width: 1000px;
-      animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    header {
-      margin-bottom: 64px;
-      text-align: center;
-    }
-
-    .brand-tag {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 16px;
-      display: block;
+      padding: 40px;
     }
 
     h1 {
-      font-size: clamp(32px, 5vw, 56px);
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin: 0 0 16px 0;
-    }
-
-    .desc {
-      font-size: 18px;
-      color: var(--text-dim);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-    }
-
-    .main-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 32px;
-      overflow: hidden;
-      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-    }
-
-    .controls {
-      display: flex;
-      padding: 32px;
-      gap: 20px;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      background: var(--glass);
-    }
-
-    .search-input {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid transparent;
-      border-radius: 14px;
-      padding: 14px 20px;
-      color: var(--text-main);
-      font-size: 16px;
-      transition: all 0.3s ease;
-    }
-
-    .search-input:focus {
-      outline: none;
-      background: rgba(255,255,255,0.08);
-      border-color: rgba(255,255,255,0.2);
-    }
-
-    button {
-      background: var(--accent);
-      color: var(--bg);
-      border: none;
-      padding: 14px 24px;
-      border-radius: 14px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      transition: transform 0.2s active, opacity 0.2s;
-      white-space: nowrap;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    button:active {
-      transform: scale(0.97);
-    }
-
-    #reloadBtn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-main);
-    }
-
-    #reloadBtn:hover {
-      background: var(--glass);
-    }
-
-    .table-box {
-      max-height: 600px;
-      overflow-y: auto;
+      margin-bottom: 10px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 20px;
+      background: #1a1a1a;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
     }
 
     th {
       text-align: left;
-      padding: 24px 32px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      background: var(--surface);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      border-bottom: 1px solid var(--border);
+      background: #222;
     }
 
-    td {
-      padding: 24px 32px;
-      font-size: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    tr:last-child td { border-bottom: none; }
-    
-    tr:hover td {
-      background: rgba(255,255,255,0.02);
-    }
-
-    .num-cell {
-      font-variant-numeric: tabular-nums;
+    td.num {
       text-align: right;
-      font-weight: 500;
     }
 
-    .bar-container {
-      display: inline-flex;
-      align-items: center;
-      gap: 16px;
-      width: 100%;
-      justify-content: flex-end;
+    .status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #aaa;
     }
-
-    .visual-bar {
-      height: 6px;
-      background: var(--accent);
-      border-radius: 3px;
-      opacity: 0.3;
-    }
-
-    .meta-footer {
-      padding: 24px 32px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--glass);
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-
-    .badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      border: 1px solid var(--border);
-    }
-
-    .badge-live { color: #00ff88; border-color: rgba(0,255,136,0.2); }
-    .badge-cache { color: #ffbb00; border-color: rgba(255,187,0,0.2); }
-
-    @keyframes reveal {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
   </style>
 </head>
 
 <body>
-  <div class="wrapper">
-    <header>
-      <span class="brand-tag">Data Visualization</span>
-      <h1>United States Population</h1>
-      <p class="desc">Global demographic insights retrieved in real-time from the DataUSA public repository.</p>
-    </header>
 
-    <div class="main-card">
-      <div class="controls">
-        <input id="search" class="search-input" type="search" placeholder="Filter by year..." />
-        <button id="sortBtn">Year ↓</button>
-        <button id="reloadBtn">Refresh</button>
-      </div>
+  <h1>United States Population</h1>
+  <div class="status" id="status">Loading...</div>
 
-      <div class="table-box">
-        <table>
-          <thead>
-            <tr>
-              <th>Fiscal Year</th>
-              <th style="text-align: right;">Total Population</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th style="text-align:right;">Population</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 
-      <div class="meta-footer">
-        <div>
-          <span id="sourceBadge" class="badge">Checking...</span>
-          <span id="lastUpdated" style="margin-left: 12px;">Syncing...</span>
-        </div>
-        <div id="countLabel">0 Records</div>
-      </div>
-    </div>
-  </div>
+<script>
+  const API_URL =
+    "https://api.datausa.io/tesseract/data.jsonrecords?cube=acs_yg_total_population_5&measures=Population&drilldowns=Year";
 
-  <script>
-    const API_URL = "https://datausa.io/api/data?drilldowns=Nation&measures=Population";
-    const PROXIES = [
-      (u) => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u),
-      (u) => "https://corsproxy.io/?url=" + encodeURIComponent(u),
-      (u) => "https://api.allorigins.win/raw?url=" + encodeURIComponent(u)
-    ];
-    
-    const FALLBACK = {
-      data: [
-        { Year: "2022", Population: 331893745 }, { Year: "2021", Population: 329725481 },
-        { Year: "2020", Population: 326569308 }, { Year: "2019", Population: 324697795 },
-        { Year: "2018", Population: 322903030 }, { Year: "2017", Population: 321004407 }
-      ]
-    };
+  const tbody = document.getElementById("tbody");
+  const status = document.getElementById("status");
 
-    const tbody = document.getElementById("tbody");
-    const sortBtn = document.getElementById("sortBtn");
-    const reloadBtn = document.getElementById("reloadBtn");
-    const searchInput = document.getElementById("search");
-    const countLabel = document.getElementById("countLabel");
-    const lastUpdated = document.getElementById("lastUpdated");
-    const sourceBadge = document.getElementById("sourceBadge");
+  function formatNumber(num) {
+    return new Intl.NumberFormat("en-US").format(num);
+  }
 
-    let dataset = [];
-    let isDescending = true;
+  (async () => {
+    try {
+      const response = await fetch(API_URL);
 
-    function formatNum(n) {
-      return new Intl.NumberFormat("en-US").format(n);
-    }
-
-    function renderTable(data) {
-      tbody.innerHTML = "";
-      if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:64px; color:#555;">No results found</td></tr>`;
-        return;
+      if (!response.ok) {
+        throw new Error("Failed to fetch data.");
       }
 
-      const maxVal = Math.max(...data.map(i => i.Population));
+      const json = await response.json();
 
-      data.forEach(item => {
+      const data = json.data
+        .map(item => ({
+          Year: Number(item.Year),
+          Population: Number(item.Population)
+        }))
+        .sort((a, b) => b.Year - a.Year);
+
+      data.forEach(row => {
         const tr = document.createElement("tr");
-        const ratio = (item.Population / maxVal) * 100;
-
         tr.innerHTML = `
-          <td style="font-weight:600; letter-spacing:-0.02em;">${item.Year}</td>
-          <td class="num-cell">
-            <div class="bar-container">
-              <span>${formatNum(item.Population)}</span>
-              <div class="visual-bar" style="width: ${ratio * 0.8}%"></div>
-            </div>
-          </td>
+          <td>${row.Year}</td>
+          <td class="num">${formatNumber(row.Population)}</td>
         `;
         tbody.appendChild(tr);
       });
-      countLabel.textContent = `${data.length} Records`;
+
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+
+      status.textContent = `Loaded at ${hh}:${mm}`;
+
+    } catch (error) {
+      status.textContent = "Error loading data.";
     }
+  })();
+</script>
 
-    function getProcessedData() {
-      const term = searchInput.value.toLowerCase();
-      let filtered = dataset.filter(d => String(d.Year).includes(term));
-      filtered.sort((a, b) => isDescending ? (b.Year - a.Year) : (a.Year - b.Year));
-      return filtered;
-    }
-
-    async function fetchData() {
-      sourceBadge.textContent = "Loading";
-      sourceBadge.className = "badge";
-
-      for (let i = 0; i < PROXIES.length; i++) {
-        try {
-          const res = await fetch(PROXIES[i](API_URL));
-          if (!res.ok) continue;
-          const text = await res.text();
-          if (!text.trim().startsWith("{")) continue;
-          
-          const parsed = JSON.parse(text);
-          dataset = parsed.data.map(d => ({ Year: Number(d.Year), Population: Number(d.Population) }));
-          sourceBadge.textContent = "Live Stream";
-          sourceBadge.className = "badge badge-live";
-          finalizeLoad();
-          return;
-        } catch (e) {}
-      }
-
-      dataset = FALLBACK.data;
-      sourceBadge.textContent = "Cached";
-      sourceBadge.className = "badge badge-cache";
-      finalizeLoad();
-    }
-
-    function finalizeLoad() {
-      renderTable(getProcessedData());
-      lastUpdated.textContent = `Updated at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-    }
-
-    sortBtn.addEventListener("click", () => {
-      isDescending = !isDescending;
-      sortBtn.textContent = `Year ${isDescending ? "↓" : "↑"}`;
-      renderTable(getProcessedData());
-    });
-
-    reloadBtn.addEventListener("click", fetchData);
-    searchInput.addEventListener("input", () => renderTable(getProcessedData()));
-    window.addEventListener("DOMContentLoaded", fetchData);
-  </script>
 </body>
 </html>
